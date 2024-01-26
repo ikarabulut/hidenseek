@@ -6,22 +6,29 @@ import (
 	"log"
 )
 
-// has to write the headers status code
-// has to set the content type
-// ++ any other headers
-// has to create the response body. In this case JSON
-
-
-
-func Create200ResponseBody(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusOK)
+func CreateHeaders(w http.ResponseWriter, statusCode int) {
+	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
+	return
+}
 
+func CreateResponseBody(w http.ResponseWriter, statusCode int) {
 	resp := make(map[string]string)
-	resp["message"] = "Status OK"
+	resp["status"] = http.StatusText(statusCode)
 
 	jsonResp, err := json.Marshal(resp)
-		if err != nil {
+	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
+	_, err = w.Write(jsonResp)
+	if err != nil {
+		log.Fatalf("Error writing to response. Err: %s", err)
+	}
+	return
+}
+
+func BuildResponse(w http.ResponseWriter, statusCode int) {
+	CreateHeaders(w, statusCode)
+	CreateResponseBody(w, statusCode)
+	return
 }
