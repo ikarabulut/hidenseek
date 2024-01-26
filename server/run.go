@@ -7,7 +7,7 @@ import (
 )
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusOK) // response needs a 
 	w.Header().Set("Content-Type", "application/json")
 	resp := make(map[string]string)
 	resp["message"] = "Status OK"
