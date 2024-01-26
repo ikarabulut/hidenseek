@@ -12,8 +12,9 @@ func CreateHeaders(w http.ResponseWriter, statusCode int) {
 	return
 }
 
-func CreateResponseBody(w http.ResponseWriter, statusCode int) {
+func CreateResponseBody(w http.ResponseWriter, statusCode int, secretHash string) {
 	resp := make(map[string]string)
+	resp["id"] = secretHash
 	resp["status"] = http.StatusText(statusCode)
 
 	jsonResp, err := json.Marshal(resp)
@@ -27,8 +28,8 @@ func CreateResponseBody(w http.ResponseWriter, statusCode int) {
 	return
 }
 
-func BuildResponse(w http.ResponseWriter, statusCode int) {
+func BuildResponse(w http.ResponseWriter, statusCode int, secretHash string) {
 	CreateHeaders(w, statusCode)
-	CreateResponseBody(w, statusCode)
+	CreateResponseBody(w, statusCode, secretHash)
 	return
 }
