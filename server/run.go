@@ -33,7 +33,10 @@ func (sHandler secretHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 func (sHandler secretHandler) getSecret(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("hash")
-	log.Println(id)
+	if id == "" {
+		http.Error(w, "No Secret ID specified", http.StatusBadRequest)
+		return
+	}
 	fStore := util.FileStore{
 		Mu:              sync.Mutex{},
 		SecretsFilePath: sHandler.secretsPath,
