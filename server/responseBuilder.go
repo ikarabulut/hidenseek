@@ -1,9 +1,9 @@
 package server
 
 import (
-	"net/http"
 	"encoding/json"
 	"log"
+	"net/http"
 )
 
 func CreateHeaders(w http.ResponseWriter, statusCode int) {

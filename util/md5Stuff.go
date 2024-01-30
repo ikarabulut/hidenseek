@@ -5,10 +5,9 @@ import (
 	"encoding/hex"
 )
 
-
 func CreateMd5Hex(secret string) (secretHex string) {
 	data := []byte(secret)
-  md5Raw := md5.Sum(data)
+	md5Raw := md5.Sum(data)
 	secretHex = hex.EncodeToString(md5Raw[:])
 	return secretHex
 }
