@@ -6,13 +6,12 @@ import (
 	"net/http"
 )
 
-func CreateHeaders(w http.ResponseWriter, statusCode int) {
+func createHeaders(w http.ResponseWriter, statusCode int) {
 	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
-	return
 }
 
-func CreateResponseBody(w http.ResponseWriter, statusCode int, secretHash string) {
+func createResponseBody(w http.ResponseWriter, statusCode int, secretHash string) {
 	resp := make(map[string]string)
 	resp["id"] = secretHash
 	resp["status"] = http.StatusText(statusCode)
@@ -25,11 +24,9 @@ func CreateResponseBody(w http.ResponseWriter, statusCode int, secretHash string
 	if err != nil {
 		log.Fatalf("Error writing to response. Err: %s", err)
 	}
-	return
 }
 
-func BuildResponse(w http.ResponseWriter, statusCode int, secretHash string) {
-	CreateHeaders(w, statusCode)
-	CreateResponseBody(w, statusCode, secretHash)
-	return
+func buildResponse(w http.ResponseWriter, statusCode int, secretHash string) {
+	createHeaders(w, statusCode)
+	createResponseBody(w, statusCode, secretHash)
 }

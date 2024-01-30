@@ -8,12 +8,11 @@ import (
 	"github.com/ikarabulut/hidenseek/util"
 )
 
-func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	BuildResponse(w, 200, "health-check")
-	return
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	buildResponse(w, 200, "health-check")
 }
 
-func CreateSecret(secretsPath string) http.HandlerFunc {
+func createSecret(secretsPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestModel := ParseBody(r)
 		secretHex := util.CreateMd5Hex(requestModel.PlainText)
@@ -25,15 +24,15 @@ func CreateSecret(secretsPath string) http.HandlerFunc {
 
 		fStore.Write(requestModel.PlainText, secretHex)
 
-		BuildResponse(w, 200, secretHex)
+		buildResponse(w, 200, secretHex)
 	}
 }
 
 func RunServer(secretsFilePath string) {
 	mux := http.NewServeMux()
 
-	health := http.HandlerFunc(HealthCheckHandler)
-	secret := http.HandlerFunc(CreateSecret(secretsFilePath))
+	health := http.HandlerFunc(healthCheckHandler)
+	secret := http.HandlerFunc(createSecret(secretsFilePath))
 
 	mux.Handle("/health", health)
 	mux.Handle("/secret", secret)
