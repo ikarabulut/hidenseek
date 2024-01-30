@@ -1,74 +1,30 @@
 package server
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
 	"sync"
 
 	"github.com/ikarabulut/hidenseek/util"
 )
-
-type FileStore struct {
-	Mu              sync.Mutex
-	SecretsFilePath string
-	Store           map[string]string
-}
-
-func (c *FileStore) updateMap(secret string, hash string) {
-	c.Mu.Lock()
-	defer c.Mu.Unlock()
-
-	f, err := os.Open(c.SecretsFilePath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	jsonData, err := io.ReadAll(f)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if len(jsonData) != 0 {
-		json.Unmarshal(jsonData, &c.Store)
-	}
-
-	c.Store[hash] = secret
-	j, err := json.Marshal(c.Store)
-
-	f, err = os.Create(c.SecretsFilePath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer f.Close()
-	_, err = f.Write(j)
-
-}
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	BuildResponse(w, 200, "health-check")
 	return
 }
 
-func SecretHandler(secretsFilePath string) http.HandlerFunc {
+func CreateSecret(secretsPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		file, err := os.Open(secretsFilePath)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		defer file.Close()
-
-		fileC := FileStore{
+		requestModel := ParseBody(r)
+		secretHex := util.CreateMd5Hex(requestModel.PlainText)
+		fStore := util.FileStore{
 			Mu:              sync.Mutex{},
-			SecretsFilePath: secretsFilePath,
+			SecretsFilePath: secretsPath,
 			Store:           make(map[string]string),
 		}
 
-		requestModel := ParseBody(r)
-		secretHex := util.CreateMd5Hex(requestModel.PlainText)
-		fileC.updateMap(requestModel.PlainText, secretHex)
+		fStore.Write(requestModel.PlainText, secretHex)
+
 		BuildResponse(w, 200, secretHex)
 	}
 }
@@ -77,7 +33,7 @@ func RunServer(secretsFilePath string) {
 	mux := http.NewServeMux()
 
 	health := http.HandlerFunc(HealthCheckHandler)
-	secret := http.HandlerFunc(SecretHandler(secretsFilePath))
+	secret := http.HandlerFunc(CreateSecret(secretsFilePath))
 
 	mux.Handle("/health", health)
 	mux.Handle("/secret", secret)
