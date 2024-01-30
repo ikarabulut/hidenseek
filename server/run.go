@@ -13,16 +13,16 @@ import (
 )
 
 type FileStore struct {
-	mu              sync.Mutex
-	secretsFilePath string
+	Mu              sync.Mutex
+	SecretsFilePath string
 	Store           map[string]string
 }
 
 func (c *FileStore) updateMap(secret string, hash string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
 
-	f, err := os.Open(c.secretsFilePath)
+	f, err := os.Open(c.SecretsFilePath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -37,7 +37,7 @@ func (c *FileStore) updateMap(secret string, hash string) {
 	c.Store[hash] = secret
 	j, err := json.Marshal(c.Store)
 
-	f, err = os.Create(c.secretsFilePath)
+	f, err = os.Create(c.SecretsFilePath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -61,8 +61,8 @@ func SecretHandler(secretsFilePath string) http.HandlerFunc {
 		defer file.Close()
 
 		fileC := FileStore{
-			mu:              sync.Mutex{},
-			secretsFilePath: secretsFilePath,
+			Mu:              sync.Mutex{},
+			SecretsFilePath: secretsFilePath,
 			Store:           make(map[string]string),
 		}
 
