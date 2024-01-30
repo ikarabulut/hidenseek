@@ -29,6 +29,22 @@ func (fStore *FileStore) Write(secret string, hash string) error {
 
 }
 
+func (fStore *FileStore) Read(id string) (string, error) {
+	fStore.Mu.Lock()
+	defer fStore.Mu.Unlock()
+
+	err := fStore.ReadFromFile()
+	if err != nil {
+		return "", err
+	}
+
+	data := fStore.Store[id]
+	delete(fStore.Store, id)
+	fStore.WriteToFile()
+
+	return data, nil
+}
+
 func (fStore *FileStore) ReadFromFile() error {
 	file, err := os.Open(fStore.SecretsFilePath)
 	if err != nil {

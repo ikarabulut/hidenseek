@@ -6,17 +6,19 @@ import (
 	"net/http"
 )
 
-func createHeaders(w http.ResponseWriter, statusCode int) {
-	w.WriteHeader(statusCode)
+type secretResponse struct {
+	Id     string
+	Status int
+	Secret string
+}
+
+func (response *secretResponse) createHeaders(w http.ResponseWriter) {
+	w.WriteHeader(response.Status)
 	w.Header().Set("Content-Type", "application/json")
 }
 
-func createResponseBody(w http.ResponseWriter, statusCode int, secretHash string) {
-	resp := make(map[string]string)
-	resp["id"] = secretHash
-	resp["status"] = http.StatusText(statusCode)
-
-	jsonResp, err := json.Marshal(resp)
+func (response *secretResponse) createResponseBody(w http.ResponseWriter) {
+	jsonResp, err := json.Marshal(response)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
@@ -26,7 +28,7 @@ func createResponseBody(w http.ResponseWriter, statusCode int, secretHash string
 	}
 }
 
-func buildResponse(w http.ResponseWriter, statusCode int, secretHash string) {
-	createHeaders(w, statusCode)
-	createResponseBody(w, statusCode, secretHash)
+func (response *secretResponse) buildResponse(w http.ResponseWriter) {
+	response.createHeaders(w)
+	response.createResponseBody(w)
 }
