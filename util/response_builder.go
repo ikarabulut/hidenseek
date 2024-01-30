@@ -1,4 +1,4 @@
-package server
+package util
 
 import (
 	"encoding/json"
@@ -6,18 +6,18 @@ import (
 	"net/http"
 )
 
-type secretResponse struct {
+type SecretResponse struct {
 	Id     string
 	Status int
 	Secret string
 }
 
-func (response *secretResponse) createHeaders(w http.ResponseWriter) {
+func (response *SecretResponse) createHeaders(w http.ResponseWriter) {
 	w.WriteHeader(response.Status)
 	w.Header().Set("Content-Type", "application/json")
 }
 
-func (response *secretResponse) createResponseBody(w http.ResponseWriter) {
+func (response *SecretResponse) createResponseBody(w http.ResponseWriter) {
 	jsonResp, err := json.Marshal(response)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
@@ -28,7 +28,7 @@ func (response *secretResponse) createResponseBody(w http.ResponseWriter) {
 	}
 }
 
-func (response *secretResponse) buildResponse(w http.ResponseWriter) {
+func (response *SecretResponse) BuildResponse(w http.ResponseWriter) {
 	response.createHeaders(w)
 	response.createResponseBody(w)
 }

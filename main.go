@@ -3,10 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 
-	"github.com/ikarabulut/hidenseek/server"
+	"github.com/ikarabulut/hidenseek/handlers"
 )
 
 func main() {
@@ -26,7 +28,11 @@ func main() {
 
 	handleFilePath(dataFilePath)
 
-	server.RunServer(dataFilePath)
+	mux := http.NewServeMux()
+	handlers.SetupHandlers(mux, dataFilePath)
+
+	log.Print("Listening...")
+	http.ListenAndServe(":3000", mux)
 }
 
 func handleFilePath(filePath string) (secretsFile os.FileInfo, err error) {

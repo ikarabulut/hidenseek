@@ -1,25 +1,17 @@
-package server
+package handlers
 
 import (
-	"log"
 	"net/http"
 	"sync"
 
 	"github.com/ikarabulut/hidenseek/util"
 )
 
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	response := secretResponse{
-		Status: 200,
-	}
-	response.buildResponse(w)
-}
-
-type secretHandler struct {
+type SecretHandler struct {
 	secretsPath string
 }
 
-func (sHandler secretHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (sHandler SecretHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		sHandler.createSecret(w, r)
@@ -31,7 +23,7 @@ func (sHandler secretHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (sHandler secretHandler) getSecret(w http.ResponseWriter, r *http.Request) {
+func (sHandler SecretHandler) getSecret(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("hash")
 	if id == "" {
 		http.Error(w, "No Secret ID specified", http.StatusBadRequest)
@@ -49,17 +41,17 @@ func (sHandler secretHandler) getSecret(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	response := secretResponse{
+	response := util.SecretResponse{
 		Id:     id,
 		Status: 200,
 		Secret: secret,
 	}
 
-	response.buildResponse(w)
+	response.BuildResponse(w)
 }
 
-func (sHandler secretHandler) createSecret(w http.ResponseWriter, r *http.Request) {
-	requestModel := ParseBody(r)
+func (sHandler SecretHandler) createSecret(w http.ResponseWriter, r *http.Request) {
+	requestModel := util.ParseBody(r)
 	secretHex := util.CreateMd5Hex(requestModel.PlainText)
 	fStore := util.FileStore{
 		Mu:              sync.Mutex{},
@@ -69,22 +61,9 @@ func (sHandler secretHandler) createSecret(w http.ResponseWriter, r *http.Reques
 
 	fStore.Write(requestModel.PlainText, secretHex)
 
-	response := secretResponse{
+	response := util.SecretResponse{
 		Id:     secretHex,
 		Status: 200,
 	}
-	response.buildResponse(w)
-}
-
-func RunServer(secretsFilePath string) {
-	mux := http.NewServeMux()
-
-	health := http.HandlerFunc(healthCheckHandler)
-	sHandler := secretHandler{secretsPath: secretsFilePath}
-
-	mux.Handle("/health", health)
-	mux.Handle("/secret", sHandler)
-
-	log.Print("Listening...")
-	http.ListenAndServe(":3000", mux)
+	response.BuildResponse(w)
 }

@@ -1,16 +1,14 @@
-package server
+package util
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/ikarabulut/hidenseek/types"
 )
 
-type SecretRequestModel struct {
-	PlainText string `json:"plain_text"`
-}
-
-func ParseBody(r *http.Request) (requestModel SecretRequestModel) {
+func ParseBody(r *http.Request) (requestModel types.SecretRequestModel) {
 	len := r.ContentLength
 	body := make([]byte, len)
 	r.Body.Read(body)
