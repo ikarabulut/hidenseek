@@ -15,4 +15,7 @@ curl --header "Content-Type: application/json" \
   http://localhost:3000/secret
 ```
 **View a secret**
-TO BE IMPLEMENTED
+Send a GET request to localhost:3000/secret with a query param of `hash`
+```
+curl "localhost:3000/secret?hash={ENTER HASH}"
+```
