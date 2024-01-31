@@ -53,7 +53,17 @@ func (sHandler SecretHandler) getSecret(w http.ResponseWriter, r *http.Request) 
 }
 
 func (sHandler SecretHandler) createSecret(w http.ResponseWriter, r *http.Request) {
+	if r.ContentLength == 0 {
+		http.Error(w, "Missing body param", http.StatusBadRequest)
+		return
+	}
+
 	requestModel := util.ParseBody(w, r)
+	if requestModel.PlainText == "" {
+		http.Error(w, "Invalid body param", http.StatusBadRequest)
+		return
+	}
+
 	secretHex := util.CreateMd5Hex(requestModel.PlainText)
 	fStore := util.FileStore{
 		Mu:              sync.Mutex{},

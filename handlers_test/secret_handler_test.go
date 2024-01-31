@@ -29,6 +29,16 @@ func TestHandlers_CreateSecret(t *testing.T) {
 			expectedHTTPStatusCode: 200,
 			expectedBody:           fmt.Sprintf("{\"Id\":\"%s\"}", "5f1903f5f2cb32acb4c1dcae9e30d374"),
 		},
+		{
+			requestBody:            "",
+			expectedHTTPStatusCode: 400,
+			expectedBody:           "Missing body param\n",
+		},
+		{
+			requestBody:            "{\"invalid\": \"super secret\"}",
+			expectedHTTPStatusCode: 400,
+			expectedBody:           "Invalid body param\n",
+		},
 	}
 
 	for _, tc := range testSetup {
