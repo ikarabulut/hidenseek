@@ -1,14 +1,16 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"sync"
 
+	"github.com/ikarabulut/hidenseek/types"
 	"github.com/ikarabulut/hidenseek/util"
 )
 
 type SecretHandler struct {
-	secretsPath string
+	SecretsPath string
 }
 
 func (sHandler SecretHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +33,7 @@ func (sHandler SecretHandler) getSecret(w http.ResponseWriter, r *http.Request) 
 	}
 	fStore := util.FileStore{
 		Mu:              sync.Mutex{},
-		SecretsFilePath: sHandler.secretsPath,
+		SecretsFilePath: sHandler.SecretsPath,
 		Store:           make(map[string]string),
 	}
 
@@ -41,29 +43,31 @@ func (sHandler SecretHandler) getSecret(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	response := util.SecretResponse{
-		Id:     id,
-		Status: 200,
-		Secret: secret,
+	jsonResp, err := json.Marshal(types.GetSecretResponse{Secret: secret})
+	if err != nil {
+		http.Error(w, "Error writing body", http.StatusInternalServerError)
 	}
-
-	response.BuildResponse(w)
+	w.WriteHeader(200)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResp)
 }
 
 func (sHandler SecretHandler) createSecret(w http.ResponseWriter, r *http.Request) {
-	requestModel := util.ParseBody(r)
+	requestModel := util.ParseBody(w, r)
 	secretHex := util.CreateMd5Hex(requestModel.PlainText)
 	fStore := util.FileStore{
 		Mu:              sync.Mutex{},
-		SecretsFilePath: sHandler.secretsPath,
+		SecretsFilePath: sHandler.SecretsPath,
 		Store:           make(map[string]string),
 	}
 
 	fStore.Write(requestModel.PlainText, secretHex)
 
-	response := util.SecretResponse{
-		Id:     secretHex,
-		Status: 200,
+	jsonResp, err := json.Marshal(types.CreateSecretResponse{Id: secretHex})
+	if err != nil {
+		http.Error(w, "Error creating hash", http.StatusInternalServerError)
 	}
-	response.BuildResponse(w)
+	w.WriteHeader(200)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResp)
 }
