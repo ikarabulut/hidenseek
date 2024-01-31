@@ -19,3 +19,10 @@ Send a GET request to localhost:3000/secret with a query param of `hash`
 ```
 curl "localhost:3000/secret?hash={ENTER HASH}"
 ```
+
+## Testing
+- Navigate to a test folder `/{package}_Test`
+- Run:
+```
+  go test -v
+```
