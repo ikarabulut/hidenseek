@@ -13,6 +13,15 @@ import (
 
 func main() {
 	dataFilePath := os.Getenv("DATA_FILE_PATH")
+	password := os.Getenv("PASSWORD")
+	if len(password) == 0 {
+		log.Fatal("Specify PASSWORD to encrypt/decrypt the file contents")
+	}
+	salt := os.Getenv("SALT")
+	if len(salt) == 0 {
+		log.Fatal("Specify SALT to encrypt/decrypt the file contents")
+	}
+
 	wd, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
@@ -29,7 +38,7 @@ func main() {
 	handleFilePath(dataFilePath)
 
 	mux := http.NewServeMux()
-	handlers.SetupHandlers(mux, dataFilePath)
+	handlers.SetupHandlers(mux, dataFilePath, password, salt)
 
 	log.Print("Listening...")
 	http.ListenAndServe(":3000", mux)

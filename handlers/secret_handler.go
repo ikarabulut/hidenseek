@@ -11,6 +11,8 @@ import (
 
 type SecretHandler struct {
 	SecretsPath string
+	Password    string
+	Salt        string
 }
 
 func (sHandler SecretHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -34,8 +36,9 @@ func (sHandler SecretHandler) getSecret(w http.ResponseWriter, r *http.Request) 
 	fStore := util.FileStore{
 		Mu:              sync.Mutex{},
 		SecretsFilePath: sHandler.SecretsPath,
-		Store:           make(map[string]string),
+		Store:           make(map[string][]byte),
 	}
+	fStore.InitCrypto(sHandler.Password, sHandler.Salt)
 
 	secret, err := fStore.Read(id)
 	if err != nil {
@@ -68,8 +71,9 @@ func (sHandler SecretHandler) createSecret(w http.ResponseWriter, r *http.Reques
 	fStore := util.FileStore{
 		Mu:              sync.Mutex{},
 		SecretsFilePath: sHandler.SecretsPath,
-		Store:           make(map[string]string),
+		Store:           make(map[string][]byte),
 	}
+	fStore.InitCrypto(sHandler.Password, sHandler.Salt)
 
 	fStore.Write(requestModel.PlainText, secretHex)
 
